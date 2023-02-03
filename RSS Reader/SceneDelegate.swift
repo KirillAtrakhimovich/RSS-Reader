@@ -25,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func createRootController() -> UINavigationController {
         let navController = UINavigationController()
-        let home = NewsViewController()
+        let home = NewsViewController(networkManager: NetworkManager())
         navController.viewControllers = [home]
         return navController
     }

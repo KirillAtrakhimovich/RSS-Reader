@@ -10,6 +10,7 @@ import UIKit
 final class NewsViewController: NiblessViewController {
     
     private var newsModel = [Article]()
+    private let isolationQueue = DispatchQueue(label: "newsRequestQueue", attributes: .concurrent)
     let networkManager: NetworkManager
     let newsView = NewsView()
     
@@ -30,17 +31,24 @@ final class NewsViewController: NiblessViewController {
             guard let self = self else { return }
             switch result {
             case .success(let newsItem):
-                self.newsModel = 
+               self.successNewsRequest(newsItem)
             case .failure(let error):
                print(error)
             }
+        }
+        print(newsModel)
+    }
+    
+    private func successNewsRequest(_ news: Articles) {
+        self.isolationQueue.async(flags: .barrier) {
+            let newsItems = self.convertNews(news)
+            self.newsModel += newsItems
         }
     }
     
     private func convertNews(_ newsInfo: Articles) -> [Article] {
         var newsItems = [Article]()
         for item in newsInfo.articles {
-//            let name = namesIds.filter { $0.1 == newsInfo.appid }.first.map { $0.0 } ?? "1"
             let model = Article(author: item.author, title: item.title, description: item.description, url: item.url, urlToImage: item.urlToImage, publishedAt: item.publishedAt, content: item.content)
             newsItems.append(model)
         }
